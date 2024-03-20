@@ -3,7 +3,7 @@
 #include <cstring>
 
 /// <summary>
-///				ÌÍÎÃÎ ÂÀÆÍÎ ÏÐÅÄÈ ÄÀ ÏÐÅÄÀÄÅØ -> ÏÐÅÃËÅÄÀÉ ÇÀ ÊÎÍÑÒ ÔÓÍÊÖÈÈ
+///				ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ -> ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 /// </summary>
 /// 
 /// 
@@ -331,13 +331,18 @@ bool parseRow(std::ifstream& file, size_t fileSize, Row& outRow)
 
 	while (readUntilChar(file, buffer, sizeof(buffer), '<'))
 	{
-		//readUntilChar(file, buffer, sizeof(buffer), '>');
+		readUntilChar(file, buffer, sizeof(buffer), '>');
 
-		if (isPrefix(buffer, "/tr>"))
+		if (isPrefix(buffer, "/tr"))
 		{
 			// Successfully parsed the row if at least one cell was parsed
 			return success;
 		}
+		else if(isPrefix(buffer, "/t"))
+		{
+			// Check for end tag (/td, /th)
+			continue;
+		} 
 
 		bool isHeader = isPrefix(buffer, "th"); // Check if the next cell is a header
 		bool cellParsed = parseCell(file, fileSize, isHeader, cell);
@@ -384,10 +389,9 @@ bool parseTable(std::ifstream& file, Table& outTable)
 
 	while (readUntilChar(file, buffer, sizeof(buffer),'<'))
 	{
-		//readUntilChar(file, buffer, sizeof(buffer), '>');
-		if (isPrefix(buffer, "/table>"))
+		readUntilChar(file, buffer, sizeof(buffer), '>');
+		if (isPrefix(buffer, "/table"))
 		{
-			file.ignore(6);
 			// Successfully parsed the table if at least one row was parsed
 			return success;
 		}
@@ -395,7 +399,6 @@ bool parseTable(std::ifstream& file, Table& outTable)
 
 		if (isPrefix(buffer, "tr"))
 		{
-			file.ignore(3);
 			Row newRow;
 			if (parseRow(file, getFileSize(file), newRow))
 			{
